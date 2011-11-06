@@ -592,6 +592,10 @@ on boot
 	chmod 0660 /sys/class/sec/pm/power_down
 	chown root system /sys/class/sec/pm/power_down
 
+# TV out
+	chown system system /dev/pmem_hdmi
+#	chown root graphics /dev/graphics/fb1
+
 # Define TCP buffer sizes for various networks
 #   ReadMin, ReadInitial, ReadMax, WriteMin, WriteInitial, WriteMax,
     setprop net.tcp.buffersize.default 4096,87380,110208,4096,16384,110208
