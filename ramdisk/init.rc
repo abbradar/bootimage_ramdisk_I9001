@@ -125,6 +125,7 @@ on emmc-fs
 #{{ SEC_DEVENC
     exec apply_sec_devenc_init
     exec apply_system_policy /dev/block/mmcblk0p17 ext4
+    exec check_filesystem /dev/block/mmcblk0p17 ext4
     wait /dev/block/mmcblk0p17
     mount ext4 /dev/block/mmcblk0p17 /data nosuid nodev crypt barrier=0 noatime wait discard errors=continue
 #  mount ext4 /dev/block/mmcblk0p17 /data nosuid nodev barrier=0 noatime wait discard errors=continue
@@ -200,8 +201,11 @@ on post-fs
     chmod 0750 /data/dontpanic
     
     # for data
-    mkdir /data/log
-    chmod 0777 /data/log
+    mkdir /data/log  0775 system log
+    chown system log /data/log
+
+    chmod 0775 /data/log
+    chmod 0775 /data/anr
 
     # Collect apanic data, free resources and re-arm trigger
     copy /proc/apanic_console /data/dontpanic/apanic_console
@@ -566,7 +570,7 @@ on boot
     
     # ihryu 2010.07.19
     setprop ro.rfkilldisabled 0
-    #class_start default
+    class_start default
 # +++++++++++++++++++++++++++++++++++++++++++
 
     # for silent reset
@@ -591,7 +595,7 @@ on boot
 # Force Power Down
 	chmod 0660 /sys/class/sec/pm/power_down
 	chown root system /sys/class/sec/pm/power_down
-
+	
 # TV out
 	chown system system /dev/pmem_hdmi
 #	chown root graphics /dev/graphics/fb1
@@ -717,9 +721,6 @@ service zygote /system/bin/app_process -Xzygote /system/bin --zygote --start-sys
     onrestart restart media
     onrestart restart netd
     onrestart restart sensor-daemon
-    
-service initd /system/bin/logwrapper /system/xbin/busybox run-parts /system/etc/init.d
-    oneshot
 
 service media /system/bin/mediaserver
     user media
@@ -876,4 +877,7 @@ service tvout /system/bin/tvoutserver
 service dhcpcd /system/bin/logwrapper /system/bin/dhcpcd -d eth0
 disabled
 oneshot
+
+service initd /system/bin/logwrapper /system/xbin/busybox run-parts /system/etc/init.d
+    oneshot
 
